@@ -1,0 +1,2 @@
+
+((:TITLE "natalie" :ARTIST "merchant" :RATING 10 :RIPPED NIL) (:TITLE "aaa" :ARTIST "bbb" :RATING 10 :RIPPED NIL) (:TITLE "aaa" :ARTIST "bbb" :RATING 1 :RIPPED T) (:TITLE "fly" :ARTIST "dixie chicks" :RATING 8 :RIPPED T) (:TITLE "fly" :ARTIST "dixie chicks" :RATING 8 :RIPPED T) (:TITLE "aaa" :ARTIST "bbb" :RATING 1 :RIPPED T)) 
