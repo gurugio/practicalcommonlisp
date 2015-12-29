@@ -102,3 +102,29 @@
 (print *db*)
 
 (defmacro backwards (expr) (reverse expr))
+
+(defun make-comparision-expr-wrong (field value)
+  (list equal (list getf cd field) value))
+
+(defun make-comparision-expr-with-list (field value)
+  (list 'equal (list 'getf 'cd field) value))
+
+(defun make-comparision-expr (field value)
+  `(equal (getf cd ,field) ,value))
+
+(defun make-comparision-list (fields)
+  (loop while fields
+       collecting (make-comparision-expr (pop fields) (pop fields))))
+
+(defmacro where (&rest clauses)
+  `#'(lambda (cd) (and ,@(make-comparision-list clauses))))
+
+(print `(and ,(list 1 2 3)))
+(print `(and ,@(list 1 2 3)))
+
+(print (macroexpand-1 '(where :title "aaa" :artist "bbb")))
+
+(print (select (where :title "aaa" :artist "bbb")))
+(print (select #'(lambda (cd)
+		   (and (equal (getf cd :title) "aaa")
+			(equal (getf cd :artist) "bbb")))))
