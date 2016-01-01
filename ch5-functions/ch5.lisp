@@ -45,6 +45,29 @@
   (dotimes (i 10) (print i)))
 (print (foo-dotimes))
 
+(print (function foo-dotimes))
+(print #'foo-dotimes)
 
+(defun plot (fn min max step)
+  (loop for i from min to max by step do
+       (format t "i=~a count=~a" i (funcall fn i))
+       (loop repeat (funcall fn i) do (format t "*"))
+       (format t "~%")))
 
+(plot #'exp 0 4 1/2)
+(print (loop for i from 1 to 10 by 2 do
+	    (print i)))
+(print (loop repeat 4 do (format t "*")))
+
+(apply #'plot '(exp 0 4 1/2))
+(apply #'plot #'exp '(0 4 1/2))
 			  
+(print (apply #'(lambda (a b c) (+ a b c)) '(1 2 3)))
+(print (apply (lambda (a b c) (+ a b c)) '(1 2 3)))
+(apply #'plot (lambda (v) (* v v)) '(0 4 1/2))
+
+(print (funcall (lambda (a) (* a a a)) 3))
+;;(print (funcall '(lambda (a) (* a a a)) 3)) ;wrong
+
+
+
