@@ -28,4 +28,36 @@
 			((> 1 2) (print "no"))
 			((> 2 1) (print "yes")))))
 
+(print (do ((n 0 (+ n 1))
+	    (cur 0 next)
+	    (next 1 (+ cur next)))
+	   ((= 10 n) cur)
+	 (format t "~a ~a ~a~%" n cur next)))
 
+(do ((i 0 (+ i 1)))
+    ((>= i 4))
+  (print i))
+
+
+(defvar *global-current-time* 0)
+
+(defun current-time ()
+  *global-current-time*)
+
+(let ((future-time 15))
+  (do ()
+      ((> (current-time) future-time))
+    (format t "Waiting~%")
+    (sleep 5))
+  (print "FINISH"))
+
+;; repl and do are running concurrently
+(setf *global-current-time* 10)
+(setf *global-current-time* 15)
+(setf *global-current-time* 20)
+
+(let ((future-time 40))
+  (loop (when (> (current-time) future-time) (return))
+     (format t "Waiting:~a~%" future-time)
+     (sleep 5)))
+(setf *global-current-time* 45)
