@@ -12,8 +12,8 @@
 
 (print (macroexpand-1 '(check (= (+ 1 2) 3) (= (+ 1 2) 4))))
 ;; (PROGN
-;;  (REPORT-RESULT (= (+ 1 2) 3) '(= (+ 1 2) 3))
-;;  (REPORT-RESULT (= (+ 1 2) 4) '(= (+ 1 2) 4))) 
+;;   (REPORT-RESULT (= (+ 1 2) 3) '(= (+ 1 2) 3))
+;;   (REPORT-RESULT (= (+ 1 2) 4) '(= (+ 1 2) 4)))
 
 (check
   (= (+ 1 2) 3)
@@ -23,12 +23,20 @@
 (defun report-result (result form)
   (format t "~:[FAIL~;pass~] ... ~a~%" result form)
   result)
+;; CL-USER> (report-result (= 1 2) '(= 1 2))
+;; FAIL ... (= 1 2)
+;; NIL
+;; CL-USER> (report-result (= 2 2) '(= 2 2))
+;; pass ... (= 2 2)
+;; T
 
 (defmacro with-gensyms ((&rest names) &body body)
   `(let ,(loop for n in names collect `(,n (gensym)))
      ,@body))
-
 (print (macroexpand-1 '(with-gensyms (result1 result2) (aaa) (bbb))))
+;; (LET ((RESULT1 (GENSYM)) (RESULT2 (GENSYM)))
+;;   (AAA)
+;;   (BBB)) 
 
 (defmacro combine-results (&body forms)
   (with-gensyms (result)
@@ -45,6 +53,22 @@
 ;;   (UNLESS (= (- 3 2) 1) (SETF #:G846 NIL))
 ;;   #:G846) 
 
+;; Basically above is equivalent to following.
+(let ((aaa (gensym)))
+  `(let ((,aaa t))
+     (print ,aaa)))
+;; Its value is another (LET ...) expression
+(print (let ((aaa (gensym)))
+	 `(let ((,aaa t))
+	    (print ,aaa))))
+;; (LET ((#:G853 T))
+;;   (PRINT #:G853))
+;; Evaluating it returns T
+(eval (let ((aaa (gensym)))
+	`(let ((,aaa t))
+	   (print ,aaa))))
+
+
 (defmacro check (&body forms)
   `(combine-results
     ,@(loop for f in forms collect `(report-result ,f ',f))))
@@ -52,13 +76,23 @@
 			(= (+ 1 2) 3)
 			(= (+ 1 2) 4)
 			(= (- 3 2) 1))))
-(print (macroexpand-1 '(combine-results
-			(report-result (= (+ 1 2) 3) '(= (+ 1 2) 3)))))
+;; (COMBINE-RESULTS
+;;   (REPORT-RESULT (= (+ 1 2) 3) '(= (+ 1 2) 3))
+;;   (REPORT-RESULT (= (+ 1 2) 4) '(= (+ 1 2) 4))
+;;   (REPORT-RESULT (= (- 3 2) 1) '(= (- 3 2) 1))) 
+(print (check
+	 (= (+ 1 2) 3)
+	 (= (+ 1 2) 4)
+	 (= (- 3 2) 1))) ;; return NIL
+(print (check
+	 (= (+ 1 2) 3)
+	 (= (- 3 2) 1))) ;; return T
+
 
 ;;--> not working
-(LET ((#:G851 T) (aaa t))
-  (print aaa)
-  (print #:g851))
+(LET ((bbb (gensym)) (aaa t))
+  (print bbb)
+  (print aaa))
 
 (LET ((res T))
   (UNLESS (REPORT-RESULT (= (+ 1 2) 3) '(= (+ 1 2) 3)) (SETF res NIL))
