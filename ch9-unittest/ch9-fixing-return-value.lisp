@@ -43,6 +43,13 @@
     `(let ((,result t))
        ,@(loop for f in forms collect `(unless ,f (setf ,result nil)))
        ,result)))
+
+;; '(combile-results ...) is the list.
+;; But combile-results is the macro so it is interpreted
+;; before evaluation and translated into (let ((...)))
+;; The with-gensyms is evaluated when the combile-result macro
+;; is interpreted. Therefore (combile-results ...) is not
+;; including with-gensyms macro, but only (let ((...)))
 (print (macroexpand-1 '(combine-results
 			(= (+ 1 2) 3)
 			(= (+ 1 2) 4)
@@ -88,12 +95,15 @@
 	 (= (+ 1 2) 3)
 	 (= (- 3 2) 1))) ;; return T
 
-
-;;--> not working
+;; print generated-symbole such like #;G908
+;; and T
 (LET ((bbb (gensym)) (aaa t))
   (print bbb)
   (print aaa))
 
-(LET ((res T))
-  (UNLESS (REPORT-RESULT (= (+ 1 2) 3) '(= (+ 1 2) 3)) (SETF res NIL))
-  res)
+(print
+ (LET ((res T))
+   (UNLESS (REPORT-RESULT (= (+ 1 2) 3) '(= (+ 1 2) 3)) (SETF res NIL))
+   res))
+
+
