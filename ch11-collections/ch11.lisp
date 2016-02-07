@@ -33,10 +33,34 @@
 (print (vector-push 'e *xxx*)) ; 4
 (print (vector-push 'f *xxx*)) ; nil
 (print *xxx*) ; #(a b c d e)
+(print (length *xxx*))
+(print (elt *xxx* 0))
+(print (elt *xxx* 1))
+(print (elt *xxx* 2))
+(print (elt *xxx* 3))
+(setf (elt *xxx* 3) 'c)
+(print *xxx*)
 (print (vector-push-extend 'f *xxx*)) ; vector-push-extend!!!
 (print (vector-push-extend 'g *xxx*))
-(print *xxx*) ; #(A B C D E F G) 
+(print *xxx*)
+(print (count 'c *xxx*))
+(print (remove 'f *xxx*))
+(print *xxx*) ; f is not removed
+(defparameter *xxx2* (remove 'f *xxx*))
+(print *xxx2*) ; no f
+(print (substitute 'i 'c *xxx*)) ; c->i
+(print (find 'c *xxx*))
+(print (position 'c *xxx*))
 (print (vector-pop *xxx*)) ; pop is the same
+
+(print (count "fff" #("fff" "bar" "baz") :test #'string=))
+(print (find 'c #((a 10) (b 20) (c 30) (d 40)) :key #'first))
+
+(defparameter *v* #((a 10) (b 20) (a 30) (b 40)))
+(defun verbose-first (x) (format t "Looking at ~s~%" x) (car x))
+(print (count 'a *v* :key #'verbose-first))
+(print (count 'a *v* :key #'verbose-first :from-end t))
+
 
 
 
