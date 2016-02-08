@@ -61,6 +61,34 @@
 (print (count 'a *v* :key #'verbose-first))
 (print (count 'a *v* :key #'verbose-first :from-end t))
 
+(print (count-if #'evenp #(1 2 3 4 5)))
+(print (count-if #'evenp '(1 2 3 4 5))) ; What is different?
+(print (count-if-not #'evenp #(1 2 3)))
+(print (position-if #'digit-char-p "abcd0123"))
+(print (remove-if-not #'(lambda (x) (char= (elt x 0) #\f))
+		      #("foo" "bar" "baz" "foom")))
 
+(print (count-if #'evenp #((1 a) (2 b) (3 c) (4 d) (5 e)) :key #'first))
+(print (count-if-not #'evenp #((1 a) (2 b) (3 c) (4 d) (5 e)) :key #'first))
+(print (remove-if #'alpha-char-p #("foo" "bar" "123a")
+		  :key #'(lambda (x) (elt x 0))))
+(print (remove-if-not #'alpha-char-p #("foo" "bar" "123a")
+		      :key #'(lambda (x) (elt x 0))))
+
+(print (copy-seq #(a b c)))
+(print (reverse #(1 2 3 4 5 6)))
+(print (concatenate 'vector #(1 2) '(3 4 5 6)))
+(print (concatenate 'list #(1 2 3) '(5 6 7)))
+(print (concatenate 'string "asdf" '(#\q #\w #\e)))
+
+(print (sort (vector "aaa" "bbb" "ccc") #'string<))
+(print (sort (vector "aaa" "bbb" "ccc") #'string>))
+
+(print (merge 'vector #(1 3 5) #(2 4 6) #'<))
+(print (merge 'string "ace" "bdf" #'string<))
+
+
+
+		      
 
 
