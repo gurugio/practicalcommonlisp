@@ -87,8 +87,59 @@
 (print (merge 'vector #(1 3 5) #(2 4 6) #'<))
 (print (merge 'string "ace" "bdf" #'string<))
 
+;;; subsequence manipulation
+(defparameter *x* (copy-seq "abcdefghijk"))
+(setf (subseq *x* 3 6) "XXX")
+(print *x*)
 
+;;; sequence predicates
+(print (every #'evenp #(2 4 6)))
+(print (some #'evenp #(1 3 6)))
+(print (notany #'evenp #(1 3 4)))
+(print (notany #'evenp #(1 3 5)))
+(print (notevery #'evenp #(1 3 4)))
+(print (notevery #'evenp #(1 3 5)))
 
-		      
+(print (every #'> #(2 3 4 5) #(1 2 3 4)))
+(print (some #'> #(2 3 4 5) #(3 4 5 4)))
+
+;;; sequence mapping functions
+(print (map 'vector #'* #(1 2 3 4) #(10 20 30 40))) ; #(10 40 90 160)
+(print (reduce #'+ #(1 2 3 4 5 6 7 8 9 10))) ; sum(1~10)
+(print (reduce #'* #(2 2 2 2 2))) ; 2**5
+(print (reduce #'max #(6 4 7 3 6 3 4 3 8 2 3 5 6 4))) ; find max val
+(print (reduce #'max #(6 4 5 4 3 2 1 3 8 2 3 5 6 4) :start 3 :end 6))
+(print (reduce #'max #(6 4 5 4 3 2 1 3 8 2 3 5 6 4)
+	       :from-end t :start 3 :end 6))
+
+;;; hash tables
+(print (eql "asdf" "asdf"))
+(print (equal "asdf" "asdf"))
+
+(defparameter *h* (make-hash-table))
+(print (gethash 'foo *h*))
+(setf (gethash 'foo *h*) 'quuu)
+(print (gethash 'foo *h*))
+
+(defun show-value (key hash-table)
+  (multiple-value-bind (value present) (gethash key hash-table)
+    (if present
+	(format nil "Value ~a actually present" value)
+	(format nil "Value ~a not found" value))))
+(setf (gethash 'bar *h*) nil)
+(print (show-value 'foo *h*))
+(print (show-value 'bar *h*))
+(print (show-value 'no *h*))
+
+(remhash 'bar *h*)
+(print (show-value 'bar *h*))
+
+(clrhash *h*)
+(print (show-value 'foo *h*))
+
+;;; hash table iteration
+(setf (gethash 'foo *h*) 'quuu)
+(setf (gethash 'bar *h*) 'xoxo)
+(print (maphash #'(lambda (k v) (format t "~a => ~a~%" k v)) *h*))
 
 
