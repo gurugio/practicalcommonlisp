@@ -56,11 +56,37 @@
 (foo) ; winding call-stack and go out of block-a
 
 
+;;; multiple values
 
+;; values-list returns multiple values
+;; but only the primary value is used
+(print (values-list '(1 2))) ; 1
+(print (apply #'values '(1 2))) ; 1
 
-  
+(print (+ (values-list '(1 2)) (values-list '(3 7)))) ; 4
+(print (funcall #'+ (values-list '(1 2)) (values-list '(3 7)))) ; 4
+(print (multiple-value-call #'+ (values-list '(1 2)) (values-list '(3 7)))) ; 13
 
+;; values == values-list
+(print (multiple-value-bind (a b) (values-list '(3 5)) (+ a b)))
+(print (multiple-value-bind (a b) (values 3 5) (+ a b)))
 
-   
+;; multiple-values -> list
+(print (multiple-value-list (values 1 2)))
 
+;; list -> multiple-values
+;; print function prints only the primary value
+;; REPL can print both values
+;; CL-USER> (values-list (multiple-value-list (values 1 2)))
+;; 1
+;; 2
+(values-list (multiple-value-list (values 1 2)))
+
+(defparameter *x* 0)
+(defparameter *y* 0)
+(print (floor (/ 57 34))) ; print 1 but actually multiple-values
+(print (multiple-value-list (floor (/ 57 34)))) ; print (1 23/34)
+(setf (values *x* *y*) (floor (/ 57 34)))
+(print *x*)
+(print *y*)
 	
