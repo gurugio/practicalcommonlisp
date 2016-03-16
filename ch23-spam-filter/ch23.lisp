@@ -74,6 +74,43 @@
 (print (slot-value (gethash "foo" *feature-database*) 'ham-count)) ; 0
 (print (slot-value (gethash "foo" *feature-database*) 'spam-count))
 
+;; generic method to print newly added objects
+(defmethod print-object ((object word-feature) stream)
+  (print-unreadable-object (object stream :type t)
+    (with-slots (parsed-word ham-count spam-count) object
+      (format stream "~s :hams ~d: spam ~d" parsed-word ham-count spam-count))))
+;; generic method print-object is invoked
+;; when make-instance creates an instance of the class
+;; and instance is passed to print
+(print (make-instance 'word-feature :parsed-word "asdf"))
+
+;; print newly added objects automatically
+(print (extract-features "foo bar baz foo bar"))
+(print (extract-features "aaa bbb ccc aaa ccc"))
+
+
+
 (defun classify (text)
   (classification (score (extract-features text))))
 
+
+
+
+
+
+
+
+
+
+;;; example of generic method print-object
+(defclass bank-account ()
+  ((customer-name
+    :initarg :customer-name)
+   (balance
+    :initarg :balance)))
+(defmethod print-object ((object bank-account) stream)
+  (print-unreadable-object (object stream :type t)
+    (with-slots (customer-name balance) object
+      (format stream "~s : ~d" customer-name balance))))
+(make-instance 'bank-account :customer-name "dfs" :balance 999999)
+(print (make-instance 'bank-account :customer-name "dfs" :balance 999999))
