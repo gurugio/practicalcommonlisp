@@ -13,16 +13,26 @@
 
 ;;; spam-filter starts
 
+
+
+;;; TOP-DOWN approach
+;;; classify is the most top function
+(defun classify (text)
+  (classification (score (extract-features text))))
+
+
 (defparameter *max-ham-score* .4)
 (defparameter *min-spam-score* .6)
 
 ;; top-down approach??
 ;; high score is spam
 (defun classification (score)
-  (cond
-    ((<= score *max-ham-score*) 'ham)
-    ((>= score *min-spam-score*) 'spam)
-    (t 'unsure)))
+  (values
+   (cond
+     ((<= score *max-ham-score*) 'ham)
+     ((>= score *min-spam-score*) 'spam)
+     (t 'unsure))
+   score))
 
 (defclass word-feature ()
   ((parsed-word
@@ -37,7 +47,7 @@
     :documentation "Number of spam we've seen this feature.")
    (ham-count
     :initarg ham-count
-    :accessor pam-count
+    :accessor ham-count
     :initform 0
     :documentation "Number of ham we've seen this feature.")))
     
@@ -83,25 +93,6 @@
 ;; when make-instance creates an instance of the class
 ;; and instance is passed to print
 (print (make-instance 'word-feature :parsed-word "asdf"))
-
-;; print newly added objects automatically
-(print (extract-features "foo bar baz foo bar"))
-(print (extract-features "aaa bbb ccc aaa ccc"))
-
-
-
-(defun classify (text)
-  (classification (score (extract-features text))))
-
-
-
-
-
-
-
-
-
-
 ;;; example of generic method print-object
 (defclass bank-account ()
   ((customer-name
@@ -114,3 +105,85 @@
       (format stream "~s : ~d" customer-name balance))))
 (make-instance 'bank-account :customer-name "dfs" :balance 999999)
 (print (make-instance 'bank-account :customer-name "dfs" :balance 999999))
+
+
+;; print newly added objects automatically
+(print (extract-features "foo bar baz foo bar"))
+(print (extract-features "aaa bbb ccc aaa ccc"))
+
+
+;;; top-down approach
+(defun train (text type)
+  (dolist (feature (extract-features text))
+    (increment-count feature type))
+  (increment-total-count type))
+
+(defun increment-count (feature type)
+  (ecase type
+    (ham (incf (ham-count feature)))
+    (spam (incf (spam-count feature)))))
+
+(defun test-ecase (k)
+  (ecase k
+    (asdf (print "asdf"))
+    (qwer (print "qwer"))))
+(test-ecase 'asdf) ; ecase use eql to compare
+(test-ecase 'qwer)
+(print (eql 'asdf 'asdf)) ; T
+(print (eql "asdf" "asdf")) ; NIL
+
+(defvar *total-spams* 0)
+(defvar *total-hams* 0)
+
+(defun increment-total-count (type)
+  (ecase type
+    (ham (incf *total-hams*))
+    (spam (incf *total-spams*))))
+
+(defun clear-database ()
+  (setf
+   *feature-database* (make-hash-table :test #'equal)
+   *total-spams* 0
+   *total-hams* 0))
+   
+(defun spam-probability (feature)
+  (with-slots (spam-count ham-count) feature
+    (let ((spam-frequency (/ spam-count (max 1 *total-spams*)))
+          (ham-frequency (/ ham-count (max 1 *total-hams*))))
+      (/ spam-frequency (+ spam-frequency ham-frequency)))))
+
+;; (defun classify (text)
+;;   (classification (score (extract-features text))))
+
+(train "Make money fast" 'spam)
+(print (spam-probability (gethash "Make" *feature-database*)))
+
+;; get a list of feature and return point
+(defun score (features)
+  (let ((spam-count 0)
+	(ham-count 0))
+    (dolist (feature features)
+      (if (> (spam-count feature) (ham-count feature)) (incf spam-count)
+	  (incf ham-count)))
+    (/ spam-count (+ spam-count ham-count))))
+      
+(print (score (extract-features "Make money fast")))
+
+
+;;; training filter
+(clear-database)
+(train "Make money fast" 'spam)
+(print (multiple-value-list (classify "Make money fast")))
+(print (multiple-value-list (classify "Wanna go to the movies?")))
+(train "Do you have any money for the movies?" 'ham)
+(print (multiple-value-list (classify "Make money fast")))
+(print (multiple-value-list (classify "Want to go to the movies?")))
+(print (multiple-value-list (classify "Make money fail")))
+
+
+;;; Testing the filter
+
+(defun add-file-to-corpus (filename type corpus)
+  (vector-push-extend (list filename type) corpus))
+
+;;; A little bit boring... let's go next chapter
